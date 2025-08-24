@@ -9,7 +9,7 @@ import Foundation
 
 class HTTPClient {
     
-    private let baseURL = "https://hacker-news.firebaseio.com"
+    //private let baseURL = "https://hacker-news.firebaseio.com"
     private let session: URLSession
     
     init(session: URLSession = .shared) {
@@ -18,7 +18,7 @@ class HTTPClient {
     
     func request<T: Decodable>(endpoint: Endpoint) async throws -> T {
         
-        guard let url = URL(string: baseURL + endpoint.path) else {
+        guard let url = endpoint.url else {
             throw NetworkError.invalidURL
         }
         
@@ -49,22 +49,4 @@ class HTTPClient {
     }
 }
 
-enum NetworkError: Error, LocalizedError {
-    case invalidURL
-    case invalidResponse
-    case httpError(statusCode: Int)
-    case decodingError(Error)
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Geçersiz URL"
-        case .invalidResponse:
-            return "Geçersiz yanıt"
-        case .httpError(let statusCode):
-            return "HTTP hatası: \(statusCode)"
-        case .decodingError(let error):
-            return "Veri çözümleme hatası: \(error.localizedDescription)"
-        }
-    }
-}
+

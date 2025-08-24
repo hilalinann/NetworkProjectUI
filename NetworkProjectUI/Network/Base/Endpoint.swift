@@ -8,10 +8,13 @@
 import Foundation
 
 struct Endpoint {
+    private let baseURL = "https://hacker-news.firebaseio.com"
     let path: String
     let method: HTTPMethod
     let headers: [String: String]
     let body: Data?
+    
+    var url: URL? { URL(string: baseURL + path) }
     
     init(
         path: String,
