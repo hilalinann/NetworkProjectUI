@@ -13,28 +13,47 @@ class UserManager: ObservableObject {
     @Published var userProfile: UserProfile?
     @Published var isLoading = false
     
-    private let httpClient: HTTPClient
+    private let httpClient: Client
     
-    init(httpClient: HTTPClient = HTTPClient()) {
+    init(httpClient: Client = Client()) {
         self.httpClient = httpClient
     }
     
     func fetchUserProfile(userId: Int) async throws -> UserProfile {
         isLoading = true
         defer { isLoading = false }
-        
+
         let endpoint = Endpoint(path: "/v0/user/\(userId).json")
-        
-        do {
-            let profile: UserProfile = try await httpClient.request(endpoint: endpoint)
-            await MainActor.run {
-                self.userProfile = profile
-            }
-            return profile
-        } catch {
-            throw UserError.failedToFetchProfile
+        let request = SimpleRequest(endpoint: endpoint) // artık SimpleRequest kullanıyoruz
+
+        let profile: UserProfile = try await httpClient.request(
+            request: request,
+            responseType: UserProfile.self
+        )
+
+        await MainActor.run {
+            self.userProfile = profile
         }
+
+        return profile
     }
+
+//    func fetchUserProfile(userId: Int) async throws -> UserProfile {
+//        isLoading = true
+//        defer { isLoading = false }
+//
+//        let endpoint = Endpoint(path: "/v0/user/\(userId).json")
+//        let request = APIRequest<EmptyBody>(endpoint: endpoint) // GET isteği için boş body
+//
+//        let profile: UserProfile = try await httpClient.request(request: request, responseType: UserProfile.self)
+//        
+//        await MainActor.run {
+//            self.userProfile = profile
+//        }
+//        
+//        return profile
+//    }
+
     
     func updateUserProfile(_ profile: UserProfile) async throws -> Bool {
         isLoading = true

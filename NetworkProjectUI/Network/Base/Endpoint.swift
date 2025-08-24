@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Endpoint {
+public struct Endpoint {
     private let baseURL = "https://hacker-news.firebaseio.com"
     let path: String
     let method: HTTPMethod

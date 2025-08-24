@@ -7,30 +7,26 @@
 
 import Foundation
 
-class HTTPClient {
-    
-    //private let baseURL = "https://hacker-news.firebaseio.com"
+struct SimpleRequest: Request {
+    let endpoint: Endpoint
+}
+
+
+class Client {
+
     private let session: URLSession
     
     init(session: URLSession = .shared) {
         self.session = session
     }
     
-    func request<T: Decodable>(endpoint: Endpoint) async throws -> T {
+    func request<T: Decodable>(request: Request, responseType: T.Type) async throws -> T {
         
-        guard let url = endpoint.url else {
+        guard let urlRequest = request.buildURLRequest() else {
             throw NetworkError.invalidURL
         }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = endpoint.method.rawValue
-        request.allHTTPHeaderFields = endpoint.headers
-        
-        if let body = endpoint.body {
-            request.httpBody = body
-        }
-        
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: urlRequest)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.invalidResponse
