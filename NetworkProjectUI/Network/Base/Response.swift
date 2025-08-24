@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct APIResponse<T: Decodable> {
+struct Response<T: Decodable> {
     let data: T
     let statusCode: Int
     let headers: [String: String]
@@ -19,7 +19,6 @@ struct APIResponse<T: Decodable> {
     }
 }
 
-// Hata durumları için response wrapper
 struct ErrorResponse: Decodable {
     let error: String
     let message: String?
