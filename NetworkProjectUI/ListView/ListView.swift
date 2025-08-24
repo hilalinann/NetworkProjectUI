@@ -27,7 +27,7 @@ struct ListView: View {
                 Alert(title: Text("Hata"), message: Text(error.message), dismissButton: .default(Text("Tamam")))
             }
             .navigationDestination(for: Route.self) { route in
-                router.view(for: route)
+                ListViewRouter().view(for: route)
             }
         }
     }

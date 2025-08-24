@@ -9,10 +9,12 @@ import Foundation
 
 extension Int {
     func timeAgoDisplay() -> String {
+        let now = Date()
         let date = Date(timeIntervalSince1970: TimeInterval(self))
         let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        return formatter.localizedString(for: date, relativeTo: Date())
+        formatter.unitsStyle = .abbreviated
+        formatter.locale = Locale(identifier: "tr_TR")
+        return formatter.localizedString(for: date, relativeTo: now)
     }
 }
 

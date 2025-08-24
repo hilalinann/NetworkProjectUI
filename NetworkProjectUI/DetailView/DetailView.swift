@@ -11,23 +11,55 @@ struct DetailView: View {
     let news: HackerNews
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text(news.title)
-                .font(.title)
-                .bold()
-            Text("Yazan: \(news.author)")
-            Text("Skor: \(news.score) | Yorum: \(news.commentCount ?? 0)")
-            
-            if let url = news.url {
-                Link("Haberi Oku", destination: url)
-                    .font(.headline)
-                    .foregroundColor(.blue)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(news.title)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.horizontal)
+                
+                HStack {
+                    Label("\(news.score)", systemImage: "arrow.up")
+                        .foregroundColor(.orange)
+                    
+                    Spacer()
+                    
+                    Label("\(news.commentCount ?? 0)", systemImage: "message")
+                        .foregroundColor(.blue)
+                }
+                .padding(.horizontal)
+                
+                HStack {
+                    Label(news.author, systemImage: "person")
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    if let date = news.date {
+                        Label(date.timeAgoDisplay(), systemImage: "clock")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.horizontal)
+                
+                if let url = news.url {
+                    Link(destination: url) {
+                        HStack {
+                            Image(systemName: "link")
+                            Text(url.absoluteString)
+                                .lineLimit(2)
+                        }
+                        .foregroundColor(.blue)
+                        .padding(.horizontal)
+                    }
+                }
+                
+                Spacer()
             }
-            
-            Spacer()
+            .padding(.vertical)
         }
-        .padding()
-        .navigationTitle("Detay")
+        .navigationTitle("Haber Detayı")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
