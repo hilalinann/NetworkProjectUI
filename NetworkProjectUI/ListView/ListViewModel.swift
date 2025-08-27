@@ -24,15 +24,11 @@ class ListViewModel: ObservableObject {
     
     func fetchBestStories() {
         Task {
-            do {
-                let result = await service.fetchTopStories()
-                switch result {
-                case .success(let stories):
-                    self.newsList = stories.sorted(by: { $0.score > $1.score })
-                case .failure(let error):
-                    self.errorMessage = ErrorMessage(message: error.localizedDescription)
-                }
-            } catch {
+            let result = await service.fetchTopStories()
+            switch result {
+            case .success(let stories):
+                self.newsList = stories.sorted(by: { $0.score > $1.score })
+            case .failure(let error):
                 self.errorMessage = ErrorMessage(message: error.localizedDescription)
             }
         }
