@@ -20,13 +20,18 @@ class ListViewModel: ObservableObject {
 
     @Published var errorMessage: ErrorMessage?
     
-    private let service: APIProtocol = APIService()
+    private let service: HNServicesProtocol = HNServices()
     
     func fetchBestStories() {
         Task {
             do {
-                let news = try await service.fetchNews()
-                self.newsList = news.sorted(by: { $0.score > $1.score })
+                let result = await service.fetchTopStories()
+                switch result {
+                case .success(let stories):
+                    self.newsList = stories.sorted(by: { $0.score > $1.score })
+                case .failure(let error):
+                    self.errorMessage = ErrorMessage(message: error.localizedDescription)
+                }
             } catch {
                 self.errorMessage = ErrorMessage(message: error.localizedDescription)
             }

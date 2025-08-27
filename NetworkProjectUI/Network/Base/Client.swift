@@ -7,42 +7,55 @@
 
 import Foundation
 
-struct SimpleRequest: Request {
-    let endpoint: Endpoint
-}
-
-
-class Client {
-
+public final class Client: ClientProtocol {
+    
+    // MARK: - Properties
     private let session: URLSession
     
-    init(session: URLSession = .shared) {
+    public init(session: URLSession = .shared) {
         self.session = session
     }
     
-    func request<T: Decodable>(request: Request, responseType: T.Type) async throws -> T {
+    // MARK: - Fetch
+    public func fetch<T: Decodable>(request: Request) async -> Result<T, NetworkError> {
+        do {
+            return try await fetch(request)
+        } catch let error as NetworkError {
+            //TODO: Alert presenting
+            return .failure(error)
+        } catch {
+            //TODO: Alert presenting
+            return .failure(NetworkError(type: .unknown, message: "Unknown Error"))
+        }
+    }
+    
+    private func fetch<T: Decodable>(_ request: Request) async throws -> Result<T, NetworkError> {
         
         guard let urlRequest = request.buildURLRequest() else {
-            throw NetworkError.invalidURL
-        }
-        
-        let (data, response) = try await session.data(for: urlRequest)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.invalidResponse
-        }
-        
-        guard 200...299 ~= httpResponse.statusCode else {
-            throw NetworkError.httpError(statusCode: httpResponse.statusCode)
+            return .failure(NetworkError(type: .notFound, message: "Invalid URL")) //Geçersiz URL
         }
         
         do {
-            let decoder = JSONDecoder()
-            return try decoder.decode(T.self, from: data)
+            let (data, response) = try await session.data(for: urlRequest)
+            
+            guard let urlResponse = response as? HTTPURLResponse else {
+                return .failure(NetworkError(type: .badRequest, message: "Bad Request")) //istemci HTTP yanıtı alamadı.
+            }
+            
+            guard (200...299).contains(urlResponse.statusCode) else {
+                return .failure(NetworkError(type: .noResponse, message: "No Response")) //http isteği yapıldı ama başarılı yanıt yok
+            }
+            
+            let decodedResponse = try JSONDecoder().decode(T.self, from: data)
+            return .success(decodedResponse)
+        } catch let error as DecodingError {
+            return .failure(NetworkError.handleDecodingError(error: error))
         } catch {
-            throw NetworkError.decodingError(error)
+            return .failure(NetworkError(type: .unknown, message: "Unknown Error"))
         }
     }
 }
 
-
+public protocol ClientProtocol: Sendable {
+    func fetch<T: Decodable>(request: Request) async -> Result<T, NetworkError>
+}

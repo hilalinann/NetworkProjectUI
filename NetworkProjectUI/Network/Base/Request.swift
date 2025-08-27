@@ -8,37 +8,33 @@
 import Foundation
 
 public protocol Request {
-    var endpoint: Endpoint { get }
+    var endpoint: EndpointProtocol { get }
     var method: HTTPMethod { get }
-    var headers: [String: String] { get }
+    var header: [String: String] { get }
     var body: Encodable? { get }
 }
 
 public extension Request {
-    var method: HTTPMethod { .GET }
-    var headers: [String: String] { [:] }
-    var body: Encodable? { nil }
-}
-
-public extension Request {
+    var method: HTTPMethod {
+        .GET
+    }
     
-    func buildURLRequest() -> URLRequest? {
-        
-        guard let url = endpoint.url else { return nil }
-        
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = method.rawValue
-        urlRequest.allHTTPHeaderFields = headers
-        
-        if let body = body {
-            do {
-                urlRequest.httpBody = try JSONEncoder().encode(body)
-            } catch {
-                return nil
-            }
-        }
-        
-        return urlRequest
+    var header: [String: String] {
+        [:]
+    }
+    
+    var body: Encodable? {
+        nil
     }
 }
 
+// MARK: - Build
+public extension Request {
+    func buildURLRequest() -> URLRequest? {
+        var urlRequest = URLRequest(url: endpoint.url)
+        urlRequest.allHTTPHeaderFields = header
+        urlRequest.httpMethod = method.rawValue
+        urlRequest.httpBody = body?.data()
+        return urlRequest
+    }
+}
