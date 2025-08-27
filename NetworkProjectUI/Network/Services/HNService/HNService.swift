@@ -13,10 +13,6 @@ protocol HNServicesProtocol: Sendable {
 }
 
 final class HNServices: HNServicesProtocol {
-    func fetchNews<T>(request: any Request) async -> Result<T, NetworkError> where T : Decodable {
-        return await client.fetch(request: request)
-    }
-    
     
     //MARK: - Client
     private let client: ClientProtocol
@@ -26,8 +22,12 @@ final class HNServices: HNServicesProtocol {
     }
     
     //MARK: - Services
+    func fetchNews<T>(request: any Request) async -> Result<T, NetworkError> where T : Decodable {
+        return await client.fetch(request: request)
+    }
     
     func fetchTopStories() async -> Result<[HackerNews], NetworkError> {
+        
         let topStoriesResult: Result<[Int], NetworkError> = await fetchNews(request: HNRequests.bestStories)
         
         switch topStoriesResult {
