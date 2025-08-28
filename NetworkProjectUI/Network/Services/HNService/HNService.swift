@@ -9,7 +9,7 @@ import Foundation
 
 protocol HNServicesProtocol: Sendable {
     func fetchNews<T: Decodable>(request: Request) async -> Result<T, NetworkError>
-    func fetchTopStories() async -> Result<[HackerNews], NetworkError>
+    //func fetchBestStories() async -> Result<[HackerNews], NetworkError>
 }
 
 final class HNServices: HNServicesProtocol {
@@ -26,29 +26,29 @@ final class HNServices: HNServicesProtocol {
         return await client.fetch(request: request)
     }
     
-    func fetchTopStories() async -> Result<[HackerNews], NetworkError> {
-        
-        let topStoriesResult: Result<[Int], NetworkError> = await fetchNews(request: HNRequests.bestStories)
-        
-        switch topStoriesResult {
-        case .failure(let error):
-            return .failure(error)
-        case .success(let storyIds):
-            let limitedIds = Array(storyIds.prefix(20))
-            var stories: [HackerNews] = []
-            
-            for storyId in limitedIds {
-                let detailResult: Result<HackerNews, NetworkError> = await fetchNews(request: HNRequests.storiesDetail(storyId: storyId))
-                
-                switch detailResult {
-                case .success(let story):
-                    stories.append(story)
-                case .failure(let error):
-                    print("Story \(storyId) yüklenirken hata: \(error)")
-                }
-            }
-            
-            return .success(stories)
-        }
-    }
+//    func fetchBestStories() async -> Result<[HackerNews], NetworkError> {
+//        
+//        let topStoriesResult: Result<[Int], NetworkError> = await fetchNews(request: HNRequests.bestStories)
+//        
+//        switch topStoriesResult {
+//        case .failure(let error):
+//            return .failure(error)
+//        case .success(let storyIds):
+//            let limitedIds = Array(storyIds.prefix(20))
+//            var stories: [HackerNews] = []
+//            
+//            for storyId in limitedIds {
+//                let detailResult: Result<HackerNews, NetworkError> = await fetchNews(request: HNRequests.storiesDetail(storyId: storyId))
+//                
+//                switch detailResult {
+//                case .success(let story):
+//                    stories.append(story)
+//                case .failure(let error):
+//                    print("Story \(storyId) yüklenirken hata: \(error)")
+//                }
+//            }
+//            
+//            return .success(stories)
+//        }
+//    }
 }
