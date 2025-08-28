@@ -22,17 +22,9 @@ class ListViewModel: ObservableObject {
     
     private let service: HNServicesProtocol = HNServices()
     
-    func fetchStoryIds() async -> Result<[Int], NetworkError> {
-        return await service.fetchNews(request: HNRequests.bestStories)
-    }
-    
-    func fetchStoryDetail(storyId: Int) async -> Result<HackerNews, NetworkError> {
-        return await service.fetchNews(request: HNRequests.storiesDetail(storyId: storyId))
-    }
-    
     func fetchBestStories() {
         Task {
-            let idsResult = await fetchStoryIds()
+            let idsResult = await service.fetchStoryIds()
             
             switch idsResult {
             case .failure(let error):
@@ -43,7 +35,7 @@ class ListViewModel: ObservableObject {
                 var stories: [HackerNews] = []
                     
                 for id in limitedIds {
-                    let detailResult = await fetchStoryDetail(storyId: id)
+                    let detailResult = await service.fetchStoryDetail(storyId: id)
                     switch detailResult {
                     case .success(let story):
                         stories.append(story)
@@ -56,17 +48,4 @@ class ListViewModel: ObservableObject {
             }
         }
     }
-        
-        
-//    func fetchBestStories() {
-//        Task {
-//            let result = await service.fetchBestStories()
-//            switch result {
-//            case .success(let stories):
-//                self.newsList = stories.sorted(by: { $0.score > $1.score })
-//            case .failure(let error):
-//                self.errorMessage = ErrorMessage(message: error.localizedDescription)
-//            }
-//        }
-//    }
 }
