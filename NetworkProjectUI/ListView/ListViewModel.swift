@@ -22,29 +22,30 @@ class ListViewModel: ObservableObject {
     
     private let service: HNServicesProtocol = HNServices()
     
+    private func fetchStoriesDetail(from ids: [Int]) async -> [HackerNews] {
+        var stories: [HackerNews] = []
+        
+        for id in ids {
+            do {
+                let story = try await service.fetchStoryDetail(storyId: id).get()
+                stories.append(story)
+            } catch {
+                print("Story \(id) yüklenirken hata: \(error)")
+            }
+        }
+        return stories
+    }
+
+
     func fetchBestStories() {
         Task {
-            let idsResult = await service.fetchStoryIds()
-            
-            switch idsResult {
-            case .failure(let error):
-                self.errorMessage = ErrorMessage(message: error.localizedDescription)
-                
-            case .success(let storyIds):
+            do {
+                let storyIds = try await service.fetchStoryIds().get()
                 let limitedIds = Array(storyIds.prefix(20))
-                var stories: [HackerNews] = []
-                    
-                for id in limitedIds {
-                    let detailResult = await service.fetchStoryDetail(storyId: id)
-                    switch detailResult {
-                    case .success(let story):
-                        stories.append(story)
-                    case .failure(let error):
-                        print("Story \(id) yüklenirken hata: \(error)")
-                    }
-                }
-                    
+                let stories = await fetchStoriesDetail(from: limitedIds)
                 self.newsList = stories.sorted(by: { $0.score > $1.score })
+            } catch {
+                self.errorMessage = ErrorMessage(message: error.localizedDescription)
             }
         }
     }
