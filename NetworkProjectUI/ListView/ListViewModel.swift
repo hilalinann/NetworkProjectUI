@@ -35,13 +35,16 @@ class ListViewModel: ObservableObject {
         }
         return stories
     }
-
-
-    func fetchBestStories() {
+    
+    private func fetchTopStoryIds(limit: Int = 20) async throws -> [Int] {
+        let storyIds = try await service.fetchStoryIds().get()
+        return Array(storyIds.prefix(limit))
+    }
+    
+    func fetchStories() {
         Task {
             do {
-                let storyIds = try await service.fetchStoryIds().get()
-                let limitedIds = Array(storyIds.prefix(20))
+                let limitedIds = try await fetchTopStoryIds()
                 let stories = await fetchStoriesDetail(from: limitedIds)
                 self.newsList = stories.sorted(by: { $0.score > $1.score })
             } catch {

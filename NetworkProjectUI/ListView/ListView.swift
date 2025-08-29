@@ -21,7 +21,7 @@ struct ListView: View {
             }
             .navigationTitle("Hacker News")
             .onAppear {
-                viewModel.fetchBestStories()
+                viewModel.fetchStories()
             }
             .alert(item: $viewModel.errorMessage) { error in
                 Alert(title: Text("Hata"), message: Text(error.message), dismissButton: .default(Text("Tamam")))
